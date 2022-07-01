@@ -10,7 +10,7 @@ import (
 
 var (
 	Driver = "mysql"
-	DsName = "root:123456789@tcp(127.0.0.1:3306)/chat?charset=utf8"
+	DsName = "root:123456@tcp(127.0.0.1:3306)/chat?charset=utf8"
 	DB     *xorm.Engine
 	DBErr  error
 )
