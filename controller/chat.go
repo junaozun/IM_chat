@@ -69,20 +69,24 @@ type Node struct {
 }
 
 // 映射关系表
-var clientMap map[int64]*Node = make(map[int64]*Node, 0)
+var clientMap = make(map[int64]*Node, 0)
 
 // 读写锁
 var rwlocker sync.RWMutex
 
 //
 // ws://127.0.0.1/chat?id=1&token=xxxx
+// 客户端和服务器建立websocket链接
 func Chat(writer http.ResponseWriter, request *http.Request) {
 	// todo 检验接入是否合法
 	query := request.URL.Query()
 	id := query.Get("id")
 	token := query.Get("token")
 	userId, _ := strconv.ParseInt(id, 10, 64)
-
+	// 该用户已经加入长链接中了
+	if _, ok := clientMap[userId]; ok {
+		return
+	}
 	conn, err := (&websocket.Upgrader{CheckOrigin: func(r *http.Request) bool {
 		return checkToken(userId, token)
 	}}).Upgrade(writer, request, nil)
@@ -161,7 +165,7 @@ func init() {
 }
 
 // 用来存放发送的要广播的数据
-var udpsendchan chan []byte = make(chan []byte, 1024)
+var udpsendchan = make(chan []byte, 1024)
 
 // todo 将消息广播到局域网
 func broadMsg(data []byte) {
